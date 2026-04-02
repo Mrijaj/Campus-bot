@@ -1,121 +1,150 @@
-/* Color Variables */
+/* Premium Theme Variables */
 :root {
-    --bg-color: #f4f7f6;
-    --chat-bg: #ffffff;
-    --text-color: #333333;
-    --bot-msg-bg: #f1f0f0;
-    --bot-msg-border: #e0e0e0;
-    --user-msg-bg: #007bff;
-    --border-color: #dddddd;
+    --primary-color: #6366f1; /* Indigo */
+    --primary-hover: #4f46e5;
+    --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    --chat-bg: rgba(255, 255, 255, 0.85);
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --bot-msg-bg: #ffffff;
+    --bot-msg-border: rgba(0, 0, 0, 0.05);
+    --user-msg-bg: #6366f1;
     --input-bg: #ffffff;
-    --card-shadow: rgba(0,0,0,0.05);
+    --border-color: rgba(0, 0, 0, 0.1);
+    --glass-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 [data-theme="dark"] {
-    --bg-color: #121212;
-    --chat-bg: #1e1e1e;
-    --text-color: #e0e0e0;
-    --bot-msg-bg: #2d2d2d;
-    --bot-msg-border: #444444;
-    --user-msg-bg: #0d6efd;
-    --border-color: #333333;
-    --input-bg: #252525;
-    --card-shadow: rgba(0,0,0,0.4);
+    --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    --chat-bg: rgba(30, 41, 59, 0.7);
+    --text-main: #f1f5f9;
+    --text-muted: #94a3b8;
+    --bot-msg-bg: #334155;
+    --bot-msg-border: rgba(255, 255, 255, 0.1);
+    --user-msg-bg: #818cf8;
+    --input-bg: #1e293b;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
-/* Global Styles */
+/* Global Reset */
 body {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    transition: background-color 0.3s, color 0.3s;
+    background: var(--bg-gradient);
+    min-height: 100vh;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: var(--text-main);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .chat-container {
-    max-width: 600px;
+    max-width: 800px;
     margin: 2rem auto;
-}
-
-/* Chat Window */
-#chat-window {
-    height: 450px;
-    overflow-y: auto;
-    border: 1px solid var(--border-color);
-    padding: 20px;
+    height: 85vh;
+    display: flex;
+    flex-direction: column;
     background: var(--chat-bg);
-    border-radius: 12px;
-    box-shadow: 0 4px 12px var(--card-shadow);
-    transition: background 0.3s;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    box-shadow: var(--glass-shadow);
+    overflow: hidden;
 }
 
-/* Message Bubbles */
+/* Header */
+.chat-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Messages Area */
+#chat-window {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.bot-msg, .user-msg {
+    max-width: 80%;
+    padding: 1rem 1.25rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
 .bot-msg {
     background: var(--bot-msg-bg);
-    color: var(--text-color);
-    padding: 12px 16px;
-    border-radius: 15px 15px 15px 2px;
-    margin-bottom: 15px;
-    width: fit-content;
-    max-width: 85%;
+    color: var(--text-main);
+    border-radius: 4px 20px 20px 20px;
     border: 1px solid var(--bot-msg-border);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
 .user-msg {
     background: var(--user-msg-bg);
     color: white;
-    padding: 12px 16px;
-    border-radius: 15px 15px 2px 15px;
-    margin-bottom: 15px;
-    width: fit-content;
-    max-width: 85%;
+    border-radius: 20px 20px 4px 20px;
     margin-left: auto;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
 }
 
-/* Input Area */
-.form-control {
-    background-color: var(--input-bg) !important;
-    color: var(--text-color) !important;
-    border-color: var(--border-color);
-}
-
-/* Menu Buttons Container */
+/* Menu Buttons */
 .menu-buttons {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 10px;
+    gap: 10px;
+    margin-top: 12px;
 }
 
-.menu-btn, .menu-buttons .btn {
-    border-radius: 18px;
-    font-size: 0.8rem;
-    padding: 4px 12px;
+.menu-buttons .btn {
+    border-radius: 12px;
+    padding: 6px 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
 }
 
-.lang-pills .btn {
-    border-radius: 20px;
-    font-size: 0.75rem;
+/* Input Section */
+.input-area {
+    padding: 1.5rem 2rem;
+    background: rgba(0, 0, 0, 0.02);
 }
 
-/* Typing Animation */
-.typing-dot {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    background: #999;
-    border-radius: 50%;
-    margin-right: 3px;
-    animation: wave 1.3s linear infinite;
-}
-.typing-dot:nth-child(2) { animation-delay: -1.1s; }
-.typing-dot:nth-child(3) { animation-delay: -0.9s; }
-
-@keyframes wave {
-    0%, 60%, 100% { transform: translateY(0); }
-    30% { transform: translateY(-5px); }
+.input-pill {
+    background: var(--bot-msg-bg);
+    border-radius: 16px;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
 }
 
-/* Custom Scrollbar */
-#chat-window::-webkit-scrollbar { width: 6px; }
-#chat-window::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
+.input-pill input {
+    border: none !important;
+    background: transparent !important;
+    color: var(--text-main) !important;
+    box-shadow: none !important;
+}
+
+.send-btn {
+    background: var(--primary-color);
+    border: none;
+    border-radius: 12px;
+    width: 42px;
+    height: 42px;
+    color: white;
+    transition: transform 0.2s ease;
+}
+
+.send-btn:hover { transform: scale(1.05); background: var(--primary-hover); }
+
+/* Animations & Scrollbar */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+#chat-window::-webkit-scrollbar { width: 5px; }
+#chat-window::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }

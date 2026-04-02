@@ -15,10 +15,7 @@ class AIEngine:
 
     def get_answer(self, question, context, history="", selected_lang="English"):
         """
-        question: Current student query.
-        context: Text extracted from uploaded college documents.
-        history: Last few turns of conversation for context management.
-        selected_lang: Forced language choice from the UI menu.
+        Optimized for the Llama-3.1-8b-instant model to avoid 429 rate limits.
         """
 
         prompt = f"""
@@ -27,7 +24,7 @@ class AIEngine:
 
         USER LANGUAGE PREFERENCE:
         The student has explicitly selected: {selected_lang}.
-        You MUST respond ONLY in {selected_lang}. 
+        You MUST respond ONLY in {selected_lang}.
 
         KNOWLEDGE BASE (STRICT SOURCE):
         {context}
@@ -35,24 +32,23 @@ class AIEngine:
         CONVERSATION HISTORY (FOR CONTEXT):
         {history}
 
-        STRICT INSTRUCTIONS (TO PREVENT HALLUCINATION):
-        1. LANGUAGE ENFORCEMENT: Regardless of the language used in the 'STUDENT QUESTION', your entire response must be in {selected_lang}.
-        2. FACTUALITY: Use ONLY the provided 'KNOWLEDGE BASE'. If the answer is not there, say: 
-           "I'm sorry, I don't have that specific information in my campus records. Please contact the Administrative Office at Room 102."
-        3. CONTEXT MANAGEMENT: Use 'CONVERSATION HISTORY' to resolve pronouns like "it", "they", or "fees".
-        4. ACCURACY: Do not make up any dates, amounts, or names.
+        STRICT INSTRUCTIONS:
+        1. LANGUAGE ENFORCEMENT: Response must be entirely in {selected_lang}.
+        2. FACTUALITY: Use ONLY the provided 'KNOWLEDGE BASE'. If missing, refer them to Room 102.
+        3. ACCURACY: Do not hallucinate dates or fees.
 
         STUDENT QUESTION: {question}
         """
 
         try:
-            # Llama-3.3-70b provides high-tier reasoning for complex regional translations
+            # Switched to 8B-Instant for higher TPD/RPM limits and faster response times
             response = self.client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+                model="llama-3.1-8b-instant",
                 messages=[{"role": "user", "content": prompt}],
-                temperature=0.1,  # Grounded, deterministic output
-                max_tokens=600
+                temperature=0.1,  # Deterministic output
+                max_tokens=400    # Reduced from 600 to save daily tokens
             )
             return response.choices[0].message.content
         except Exception as e:
+            # Friendly error for the UI
             return f"Service currently busy. Error: {str(e)}"

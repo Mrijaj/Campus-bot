@@ -3,78 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard | Campus Bot</title>
+    <title>Fees Dept Dashboard | Campus Bot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
-        body { background-color: #f8f9fa; }
-        .upload-card { border: 2px dashed #dee2e6; border-radius: 15px; transition: 0.3s; }
-        .upload-card:hover { border-color: #0d6efd; background-color: #f1f7ff; }
-        .spinner-border { display: none; width: 1.5rem; height: 1.5rem; }
+        .admin-container { max-width: 900px; margin: 3rem auto; }
+        .upload-zone {
+            border: 2px dashed var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: 0.3s all ease;
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .upload-zone:hover {
+            border-color: var(--primary-color);
+            background: rgba(99, 102, 241, 0.05);
+        }
+        .table-card { border-radius: 20px; overflow: hidden; border: 1px solid var(--border-color); }
+        .badge-live { background: #dcfce7; color: #166534; font-weight: 600; }
+        .spinner-border { width: 1.2rem; height: 1.2rem; display: none; }
+        .btn-delete { color: #dc3545; transition: 0.2s; }
+        .btn-delete:hover { color: #a71d2a; transform: scale(1.1); }
     </style>
 </head>
-<body class="py-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2>📚 Fees Dept Dashboard</h2>
-                    <a href="/" class="btn btn-outline-secondary btn-sm">View Student Chat</a>
-                </div>
+<body class="bg-light">
+    <div class="container admin-container">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h2 class="fw-bold m-0" style="color: var(--primary-color)">📚 Fees Dept Dashboard</h2>
+                <p class="text-muted mb-0 small">Admin Portal • Rajasthan DTE Knowledge Management</p>
+            </div>
+            <a href="/" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm">View Student Chat</a>
+        </div>
 
-                <div class="card shadow-sm p-4 mb-4 upload-card">
-                    <h5 class="card-title">Update Knowledge Base</h5>
-                    <p class="text-muted small">Upload fee circulars (PDF/Word/PPT) or photos of handwritten notices.</p>
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-5" style="background: var(--chat-bg); backdrop-filter: blur(10px);">
+            <h5 class="fw-bold mb-1">Update Knowledge Base</h5>
+            <p class="text-muted small mb-4">The AI will extract text from these files to answer student queries in real-time.</p>
 
-                    <div class="input-group mb-3">
-                        <input type="file" id="fileInput" class="form-control">
-                        <button onclick="upload()" id="uploadBtn" class="btn btn-primary px-4">
-                            <span class="spinner-border spinner-border-sm me-2" id="loader" role="status"></span>
-                            Sync with AI
-                        </button>
-                    </div>
-                    <div id="status" class="fw-bold"></div>
-                </div>
+            <div class="upload-zone text-center mb-3">
+                <input type="file" id="fileInput" class="form-control mb-3 rounded-3" accept=".pdf,.docx,.pptx,.jpg,.jpeg,.png">
+                <button onclick="handleUpload()" id="uploadBtn" class="btn btn-primary px-5 py-2 fw-bold rounded-pill shadow">
+                    <span class="spinner-border spinner-border-sm me-2" id="loader" role="status"></span>
+                    <span id="btnText">Sync with AI</span>
+                </button>
+            </div>
+            <div id="status" class="text-center fw-medium small"></div>
+        </div>
 
-                <div class="card shadow-sm">
-                    <div class="card-header bg-white">
-                        <h6 class="mb-0">Active Knowledge Sources</h6>
-                    </div>
-                    <div class="card-body p-0">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Filename</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="fileList">
-                                <tr>
-                                    <td colspan="2" class="text-center text-muted py-3">No documents uploaded yet.</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+        <div class="card table-card border-0 shadow-sm bg-white">
+            <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold m-0">Active Knowledge Sources</h6>
+                <span class="badge bg-light text-dark rounded-pill">{{ files|length }} Documents</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Filename</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fileList">
+                        {% if files %}
+                            {% for file in files %}
+                            <tr id="row-{{ loop.index }}">
+                                <td class="ps-4 py-3 fw-medium text-dark">{{ file[0] }}</td>
+                                <td class="text-end pe-4">
+                                    <span class="badge badge-live rounded-pill px-3 py-2 me-3">Live</span>
+                                    <button onclick="deleteFile('{{ file[0] }}', 'row-{{ loop.index }}')" class="btn btn-sm btn-delete p-0 border-0 bg-transparent" title="Delete Source">
+                                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5 v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"/>
+                                            <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"/>
+                                        </svg>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr id="noDataRow">
+                                <td colspan="2" class="text-center text-muted py-5">
+                                    <div class="opacity-50 mb-2">📁</div>
+                                    No documents indexed in the knowledge base yet.
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
     <script>
-        async function upload() {
+        async function handleUpload() {
             const fileInput = document.getElementById('fileInput');
             const statusDiv = document.getElementById('status');
             const loader = document.getElementById('loader');
             const btn = document.getElementById('uploadBtn');
+            const btnText = document.getElementById('btnText');
 
             if (!fileInput.files[0]) {
-                alert("Please select a file first!");
+                statusDiv.className = "mt-2 text-danger";
+                statusDiv.innerText = "Please select a document first!";
                 return;
             }
 
-            // UI State: Loading
             statusDiv.className = "mt-2 text-primary";
-            statusDiv.innerText = "AI is reading and indexing your document...";
+            statusDiv.innerText = "AI is scanning and indexing contents...";
             loader.style.display = "inline-block";
+            btnText.innerText = "Processing...";
             btn.disabled = true;
 
             let formData = new FormData();
@@ -85,32 +122,46 @@
                 let data = await res.json();
 
                 if (data.status === "success") {
-                    statusDiv.className = "mt-2 text-success";
-                    // Add to table (Simulated UI update)
-                    updateTable(fileInput.files[0].name);
+                    statusDiv.className = "mt-2 text-success fw-bold";
+                    statusDiv.innerText = "✅ " + data.message;
+                    setTimeout(() => location.reload(), 1500);
                 } else {
-                    statusDiv.className = "mt-2 text-danger";
+                    statusDiv.className = "mt-2 text-danger fw-bold";
+                    statusDiv.innerText = "❌ " + data.message;
                 }
-                statusDiv.innerText = data.message;
             } catch (err) {
                 statusDiv.className = "mt-2 text-danger";
-                statusDiv.innerText = "Connection Error. Check Flask terminal.";
+                statusDiv.innerText = "System Error: Connection to Flask server lost.";
             } finally {
                 loader.style.display = "none";
+                btnText.innerText = "Sync with AI";
                 btn.disabled = false;
-                fileInput.value = ""; // Clear input
+                fileInput.value = "";
             }
         }
 
-        function updateTable(filename) {
-            const list = document.getElementById('fileList');
-            if (list.innerText.includes("No documents")) list.innerHTML = "";
+        async function deleteFile(filename, rowId) {
+            if (!confirm(`Are you sure you want to remove "${filename}" from the Knowledge Base?`)) return;
 
-            const row = `<tr>
-                <td>${filename}</td>
-                <td><span class="badge bg-success">Live & Searchable</span></td>
-            </tr>`;
-            list.innerHTML = row + list.innerHTML;
+            try {
+                const response = await fetch('/delete_file', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename: filename })
+                });
+
+                const data = await response.json();
+                if (data.status === "success") {
+                    document.getElementById(rowId).remove();
+                    if (document.querySelectorAll('#fileList tr').length === 0) {
+                        location.reload(); // Refresh to show "No documents" placeholder
+                    }
+                } else {
+                    alert("Error: " + data.message);
+                }
+            } catch (e) {
+                alert("System error during deletion.");
+            }
         }
     </script>
 </body>
