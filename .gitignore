@@ -1,0 +1,7 @@
+# .gitignore content
+.env
+database.db
+uploads/
+__pycache__/
+.venv/
+.idea/

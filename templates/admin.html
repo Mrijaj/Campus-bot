@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Campus Bot</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .upload-card { border: 2px dashed #dee2e6; border-radius: 15px; transition: 0.3s; }
+        .upload-card:hover { border-color: #0d6efd; background-color: #f1f7ff; }
+        .spinner-border { display: none; width: 1.5rem; height: 1.5rem; }
+    </style>
+</head>
+<body class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>📚 Fees Dept Dashboard</h2>
+                    <a href="/" class="btn btn-outline-secondary btn-sm">View Student Chat</a>
+                </div>
+
+                <div class="card shadow-sm p-4 mb-4 upload-card">
+                    <h5 class="card-title">Update Knowledge Base</h5>
+                    <p class="text-muted small">Upload fee circulars (PDF/Word/PPT) or photos of handwritten notices.</p>
+
+                    <div class="input-group mb-3">
+                        <input type="file" id="fileInput" class="form-control">
+                        <button onclick="upload()" id="uploadBtn" class="btn btn-primary px-4">
+                            <span class="spinner-border spinner-border-sm me-2" id="loader" role="status"></span>
+                            Sync with AI
+                        </button>
+                    </div>
+                    <div id="status" class="fw-bold"></div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0">Active Knowledge Sources</h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Filename</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fileList">
+                                <tr>
+                                    <td colspan="2" class="text-center text-muted py-3">No documents uploaded yet.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function upload() {
+            const fileInput = document.getElementById('fileInput');
+            const statusDiv = document.getElementById('status');
+            const loader = document.getElementById('loader');
+            const btn = document.getElementById('uploadBtn');
+
+            if (!fileInput.files[0]) {
+                alert("Please select a file first!");
+                return;
+            }
+
+            // UI State: Loading
+            statusDiv.className = "mt-2 text-primary";
+            statusDiv.innerText = "AI is reading and indexing your document...";
+            loader.style.display = "inline-block";
+            btn.disabled = true;
+
+            let formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                let res = await fetch('/upload', { method: 'POST', body: formData });
+                let data = await res.json();
+
+                if (data.status === "success") {
+                    statusDiv.className = "mt-2 text-success";
+                    // Add to table (Simulated UI update)
+                    updateTable(fileInput.files[0].name);
+                } else {
+                    statusDiv.className = "mt-2 text-danger";
+                }
+                statusDiv.innerText = data.message;
+            } catch (err) {
+                statusDiv.className = "mt-2 text-danger";
+                statusDiv.innerText = "Connection Error. Check Flask terminal.";
+            } finally {
+                loader.style.display = "none";
+                btn.disabled = false;
+                fileInput.value = ""; // Clear input
+            }
+        }
+
+        function updateTable(filename) {
+            const list = document.getElementById('fileList');
+            if (list.innerText.includes("No documents")) list.innerHTML = "";
+
+            const row = `<tr>
+                <td>${filename}</td>
+                <td><span class="badge bg-success">Live & Searchable</span></td>
+            </tr>`;
+            list.innerHTML = row + list.innerHTML;
+        }
+    </script>
+</body>
+</html>
